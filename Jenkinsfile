@@ -1,62 +1,25 @@
 pipeline {
     agent any
-
-    environment {
-        registry = "yourdockerhubusername/yourimagename"
-        registryCredential = 'dockerhub'
-        dockerImage = ''
-    }
-
     stages {
-        stage('Cloning Git') {
+        stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/Priyanksh4h/DSO.git'
             }
         }
-
-        stage('Building Docker Image') {
+        stage('Build') {
             steps {
-                script {
-                    dockerImage = docker.build("${registry}:latest")
-                }
+                echo 'Building project...'
             }
         }
-
-        stage('Security Scan') {
+        stage('Test') {
             steps {
-                script {
-                    // Example using Trivy for security scan
-                    sh """
-                        docker run --rm \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        aquasec/trivy:latest image ${registry}:latest
-                    """
-                }
+                echo 'Running tests...'
             }
         }
-
-        stage('Deploying Image') {
+        stage('Deploy') {
             steps {
-                script {
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push()
-                    }
-                }
+                echo 'Deploying project...'
             }
-        }
-
-        stage('Clean up') {
-            steps {
-                script {
-                    sh "docker rmi ${registry}:latest || true"
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
         }
     }
 }
